@@ -1,34 +1,31 @@
 # generator-swagger-2-ts [![NPM version][npm-image]][npm-url] [![Build Status][travis-image]][travis-url] [![Dependency Status][daviddm-image]][daviddm-url]
 > 
 
-A Swagger Codegen for typescript and javascript, A [Yeoman](http://yeoman.io) generator 
+一款基于 [Yeoman](http://yeoman.io)的swagger js/typescript代码生成器 ，借助这个软件包，可以生成一个访问swagger api 的js/typescript类.
 
-This package generates a js/typescript class from a swagger url. The code is generated using Yeoman and you can modify template to diy the generated code
+## 安装
 
-[中文文档](./README.cn.md)
-
-## Installation
-
-First, install [Yeoman](http://yeoman.io) and generator-swagger-2-ts using [npm](https://www.npmjs.com/) (we assume you have pre-installed [node.js](https://nodejs.org/)).
+需要同时安装 [Yeoman](http://yeoman.io) 和 -swagger-2-ts
 
 ```bash
 npm install -g yo
 npm install -g generator-swagger-2-ts
 ```
 
-Then generate your new project:
+然后cd到你的工作目录，执行:
 
 ```bash
 yo swagger-2-ts
 ```
 
 
-According to the prompt:
-- input swagger - UI address, http://192.168.86.8:8051/swagger-ui.html, for example, the package will automatically replace the url address 'swagger-ui.html' to 'v2 / API docs' to get really swagger API docs url,  then download and parse it to generate the API class
-- choose generate js or typescript
-- you can customize the generated API class name, API file name
+按提示
+- 输入swagger-ui 地址，例如http://192.168.86.8:8051/swagger-ui.html，程序包会自动将这个url地址replace('swagger-ui.html', 'v2/api-docs')得到swagger-api-docs，然后下载后解析，生成api class
+- 可选生成js 或者 typescript
+- 可以自定义生成的api class名称、api文件名
 
-## generated CODE：
+
+## 生成代码demo：
 
 ```javascript
 export default class API {
@@ -56,7 +53,7 @@ export default class API {
 
 ```
 
-## Use the API Class
+## 使用
 
 ```javascript
 var API = require("./api");

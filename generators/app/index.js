@@ -2,7 +2,7 @@
 const Generator = require('yeoman-generator');
 const chalk = require('chalk');
 const yosay = require('yosay');
-const codegen = require('../../codegen');
+const codegen = require('../codegen');
 const fs = require('fs');
 const axios = require('axios');
 
