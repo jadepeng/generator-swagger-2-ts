@@ -1,12 +1,12 @@
 {
   "name": "generator-swagger-2-ts",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "swagger to typescript/javascript api class use axios",
-  "homepage": "",
+  "homepage": "https://github.com/jadepeng/generator-swagger-2-ts",
   "author": {
     "name": "jadepeng",
     "email": "pjq518@gmail.com",
-    "url": ""
+    "url": "https://github.com/jadepeng"
   },
   "files": [
     "generators"
