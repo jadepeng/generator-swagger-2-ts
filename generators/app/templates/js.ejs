@@ -1,0 +1,55 @@
+/*jshint -W069 */
+import axios from 'axios'
+
+/**
+ * <%=description%>
+ * @class <%=className%>
+ * @param {(string|object)} [domainOrOptions] - The project domain or options object. If object, see the object's optional properties.
+ * @param {string} [domainOrOptions.domain] - The project domain
+ * @param {object} [domainOrOptions.token] - auth token - object with value property and optional headerOrQueryName and isQuery properties
+ */
+export default class <%=className %> {
+
+  $defaultDomain = '<%=defaultDomain%>'
+
+  /**
+   *  <%=className%>构造函数
+   * @param domain API域名
+   */
+  constructor( domain ){
+    if(domain)
+      this.$defaultDomain = domain;
+  }
+
+  <% methods.forEach( method => {%>  
+    /**
+    * <%=method.summary%>
+    * @method
+    * @name <%=className %>#<%=method.summary%>
+    <% method.parameters.forEach( parameter => { %>* @param <%=parameter.type %> <%=parameter.camelCaseName %> - <%=parameter.description %> <%} ) %>
+    * @param $domain API域名,没有指定则使用构造函数指定的
+    */
+    <%=method.methodName %> (parameters){ 
+
+      let body = null;
+      let config = {
+        baseURL: parameters.$domain || this.$defaultDomain,
+        url: '<%=method.path %>',
+        method: '<%=method.method %>'
+      };
+    
+      config.headers = {}
+      <% if ( method.headers ) { %><% method.headers.forEach( header => {%>
+      config.headers['<%=header.name%>'] = <%-header.value%>;<% }) %><% } %>
+      <% method.parameters.forEach( parameter => { %>
+      <% if (parameter.isHeaderParameter ) { %>config.headers['<%=parameter.camelCaseName%>'] = parameters.<%=parameter.camelCaseName%>;<% } %><% if ( parameter.isPathParameter ) { %>config.url = config.url.replace('{<%=parameter.camelCaseName%>}',parameters.<%=parameter.camelCaseName%>+'');<% } %><% if ( parameter.isBodyParameter ) {%>body = parameters.<%=parameter.camelCaseName %>;
+      config.data = body;<% } %><% } ) %>
+      
+      if (body) {
+        config.data = body
+      }
+      return axios.request( config );
+    }
+  <%} ) %>
+    
+}
