@@ -24,7 +24,7 @@ yo swagger-2-ts
 
 
 According to the prompt:
-- input swagger - UI address, http://192.168.86.8:8051/swagger-ui.html, for example, the package will automatically replace the url address 'swagger-ui.html' to 'v2 / API docs' to get really swagger API docs url,  then download and parse it to generate the API class
+- input swagger - UI address, for example: `http://192.168.86.8:8051/swagger-ui.html`, the package will automatically replace the url address 'swagger-ui.html' to 'v2/api-docs' to get really swagger API docs url,  then download and parse it to generate the API class
 - choose generate js or typescript
 - you can customize the generated API class name, API file name
 
@@ -35,9 +35,9 @@ export default class API {
     $defaultDomain = 'http://localhost:8051'
     /**
     * @method
-    * @name API#getAllOrgSkills
-    * @param string authorization - 认证令牌 
-    * @param $domain API域名,没有指定则使用构造函数指定的
+    * @name API#getSkillsUsingGET
+    * @param string authorization  
+    * @param $domain 
     */
     getSkillsUsingGET (parameters){ 
       let body = null;
@@ -66,12 +66,9 @@ api.getSkillsUsingGET({}).then(function (response) {
 });
 ```
 
-## Getting To Know Yeoman
+ ## Reference
 
- * Yeoman has a heart of gold.
- * Yeoman is a person with feelings and opinions, but is very easy to work with.
- * Yeoman can be too opinionated at times but is easily convinced not to be.
- * Feel free to [learn more about Yeoman](http://yeoman.io/).
+ - [swagger-js-codegen](https://github.com/wcandillon/swagger-js-codegen)
 
 ## License
 

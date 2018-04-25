@@ -32,9 +32,9 @@ export default class API {
     $defaultDomain = 'http://localhost:8051'
     /**
     * @method
-    * @name API#getAllOrgSkills
-    * @param string authorization - 认证令牌 
-    * @param $domain API域名,没有指定则使用构造函数指定的
+    * @name API#getSkillsUsingGET
+    * @param string authorization  
+    * @param $domain 
     */
     getSkillsUsingGET (parameters){ 
       let body = null;
@@ -69,6 +69,10 @@ api.getSkillsUsingGET({}).then(function (response) {
  * Yeoman is a person with feelings and opinions, but is very easy to work with.
  * Yeoman can be too opinionated at times but is easily convinced not to be.
  * Feel free to [learn more about Yeoman](http://yeoman.io/).
+
+ ## 参考
+
+ - [swagger-js-codegen](https://github.com/wcandillon/swagger-js-codegen)
 
 ## License
 
