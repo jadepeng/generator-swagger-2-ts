@@ -21,8 +21,8 @@ module.exports = class extends Generator {
       {
         type: 'input',
         name: 'swaggerUrl',
-        message: 'please input swagger url,eg:http://localhost:8051/swagger-ui.html',
-        default: 'http://localhost:8051/swagger-ui.html'
+        message: 'please input swagger url,eg:http://localhost:8080/swagger-ui.html',
+        default: 'http://localhost:8080/swagger-ui.html'
       },
       {
         type: 'input',

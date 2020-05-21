@@ -4,11 +4,11 @@ var beautify = require('js-beautify').js_beautify;
 var _ = require('lodash');
 var ts = require('./util');
 
-var normalizeName = function(id) {
+var normalizeName = function (id) {
   return id.replace(/\.|\-|\{|\}|\s/g, '_');
 };
 
-var getPathToMethodName = function(opts, m, path) {
+var getPathToMethodName = function (opts, m, path) {
   if (path === '/' || path === '') {
     return m;
   }
@@ -17,7 +17,7 @@ var getPathToMethodName = function(opts, m, path) {
   var cleanPath = path.replace(/\/$/, '');
 
   var segments = cleanPath.split('/').slice(1);
-  segments = _.transform(segments, function(result, segment) {
+  segments = _.transform(segments, function (result, segment) {
     if (segment[0] === '{' && segment[segment.length - 1] === '}') {
       segment =
         'by' + segment[1].toUpperCase() + segment.substring(2, segment.length - 1);
@@ -28,7 +28,7 @@ var getPathToMethodName = function(opts, m, path) {
   return m.toLowerCase() + result[0].toUpperCase() + result.substring(1);
 };
 
-var getViewForSwagger2 = function(opts, type) {
+var getViewForSwagger2 = function (opts, type) {
   var swagger = opts.swagger;
   var methods = [];
   var authorizedMethods = [
@@ -55,37 +55,36 @@ var getViewForSwagger2 = function(opts, type) {
     moduleName: opts.moduleName,
     className: opts.className,
     imports: opts.imports,
-    domain:
-      swagger.schemes && swagger.schemes.length > 0 && swagger.host && swagger.basePath
-        ? swagger.schemes[0] +
-          '://' +
-          swagger.host +
-          swagger.basePath.replace(/\/+$/g, '')
-        : '',
+    domain: swagger.schemes && swagger.schemes.length > 0 && swagger.host && swagger.basePath ?
+      swagger.schemes[0] +
+      '://' +
+      swagger.host +
+      swagger.basePath.replace(/\/+$/g, '') :
+      '',
     methods: [],
     definitions: []
   };
 
-  _.forEach(swagger.paths, function(api, path) {
+  _.forEach(swagger.paths, function (api, path) {
     var globalParams = [];
     /**
      * @param {Object} op - meta data for the request
      * @param {string} m - HTTP method name - eg: 'get', 'post', 'put', 'delete'
      */
-    _.forEach(api, function(op, m) {
+    _.forEach(api, function (op, m) {
       if (m.toLowerCase() === 'parameters') {
         globalParams = op;
       }
     });
 
-    _.forEach(api, function(op, m) {
+    _.forEach(api, function (op, m) {
       var M = m.toUpperCase();
       if (M === '' || authorizedMethods.indexOf(M) === -1) {
         return;
       }
       var secureTypes = [];
       if (swagger.securityDefinitions !== undefined || op.security !== undefined) {
-        var mergedSecurity = _.merge([], swagger.security, op.security).map(function(
+        var mergedSecurity = _.merge([], swagger.security, op.security).map(function (
           security
         ) {
           return Object.keys(security);
@@ -98,9 +97,9 @@ var getViewForSwagger2 = function(opts, type) {
           }
         }
       }
-      var methodName = op.operationId
-        ? normalizeName(op.operationId)
-        : getPathToMethodName(opts, m, path);
+      var methodName = op.operationId ?
+        normalizeName(op.operationId) :
+        getPathToMethodName(opts, m, path);
       // Make sure the method name is unique
       if (methods.indexOf(methodName) !== -1) {
         var i = 1;
@@ -129,7 +128,8 @@ var getViewForSwagger2 = function(opts, type) {
         isSecureApiKey: secureTypes.indexOf('apiKey') !== -1,
         isSecureBasic: secureTypes.indexOf('basic') !== -1,
         parameters: [],
-        headers: []
+        headers: [],
+        response: "object"
       };
       if (method.isSecure && method.isSecureToken) {
         data.isSecureToken = method.isSecureToken;
@@ -152,6 +152,16 @@ var getViewForSwagger2 = function(opts, type) {
         });
       }
 
+      var response = op.responses;
+
+      if (response && response['200']) {
+        var responseSchema = response['200'].schema;
+        if (responseSchema && _.isString(responseSchema.$ref)) {
+          var segments = responseSchema.$ref.split('/');
+          method.response = segments.length === 1 ? segments[0] : segments[2];
+        }
+      }
+
       var consumes = op.consumes || swagger.consumes;
       if (consumes) {
         method.headers.push({
@@ -165,7 +175,7 @@ var getViewForSwagger2 = function(opts, type) {
         params = op.parameters;
       }
       params = params.concat(globalParams);
-      _.forEach(params, function(parameter) {
+      _.forEach(params, function (parameter) {
         // Ignore parameters which contain the x-exclude-from-bindings extension
         if (parameter['x-exclude-from-bindings'] === true) {
           return;
@@ -209,7 +219,7 @@ var getViewForSwagger2 = function(opts, type) {
     });
   });
 
-  _.forEach(swagger.definitions, function(definition, name) {
+  _.forEach(swagger.definitions, function (definition, name) {
     data.definitions.push({
       name: name,
       description: definition.description,
@@ -220,7 +230,7 @@ var getViewForSwagger2 = function(opts, type) {
   return data;
 };
 
-var getViewForSwagger1 = function(opts, type) {
+var getViewForSwagger1 = function (opts, type) {
   var swagger = opts.swagger;
   var data = {
     isNode: type === 'node' || type === 'react',
@@ -231,8 +241,8 @@ var getViewForSwagger1 = function(opts, type) {
     domain: swagger.basePath ? swagger.basePath : '',
     methods: []
   };
-  swagger.apis.forEach(function(api) {
-    api.operations.forEach(function(op) {
+  swagger.apis.forEach(function (api) {
+    api.operations.forEach(function (op) {
       if (op.method === 'OPTIONS') {
         return;
       }
@@ -254,16 +264,16 @@ var getViewForSwagger1 = function(opts, type) {
         headers.name = 'Accept';
         headers.value.push(
           op.produces
-            .map(function(value) {
-              return "'" + value + "'";
-            })
-            .join(', ')
+          .map(function (value) {
+            return "'" + value + "'";
+          })
+          .join(', ')
         );
         method.headers.push(headers);
       }
 
       op.parameters = op.parameters ? op.parameters : [];
-      op.parameters.forEach(function(parameter) {
+      op.parameters.forEach(function (parameter) {
         parameter.camelCaseName = _.camelCase(parameter.name);
         if (parameter.enum && parameter.enum.length === 1) {
           parameter.isSingleton = true;

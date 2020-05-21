@@ -4,7 +4,7 @@ import axios, { AxiosResponse,AxiosRequestConfig } from 'axios'
 
 <% definitions.forEach( element => {%>
 type <%= element.name.replace("«","").replace("»","") %> = {
-  <% element.tsType.properties.forEach( propertity => { %><%= propertity.name %><% if ( propertity.optional ) { %>? <% } %>: <% if ( propertity.isRef ) { %> <%= propertity.target %> <% } %><% if ( propertity.isAtomic ) { %> <%= propertity.tsType %> <% } %> <% if ( propertity.isArray ) { %> Array <<%=propertity.elementType.target %>> | <%=propertity.elementType.target %><% } %>
+  <% element.tsType.properties.forEach( propertity => { %><%= propertity.name %> <% if ( propertity.optional ) { %>? <% } %>: <% if ( propertity.isRef ) { %> <%= propertity.target %> <% } %><% if ( propertity.isAtomic ) { %> <%- propertity.tsType %> <% } %> <% if ( propertity.isObject ) { %> object <% } %><% if ( propertity.isArray ) { %> Array <<%-propertity.elementType.target?propertity.elementType.target:propertity.elementType.tsType %>><% } %>
   <% } ) %>  
 }
 <%} ) %>
@@ -33,7 +33,9 @@ export default class <%=className %> {
     * <%=method.summary%>
     * @method
     * @name <%=className %>#<%=method.summary%>
-    <% method.parameters.forEach( parameter => { %>* @param <%=parameter.type %> <%=parameter.camelCaseName %> - <%=parameter.description %> <%} ) %>
+    <% method.parameters.forEach( parameter => { %>
+    * @param <%=parameter.type %> <%=parameter.camelCaseName %> - <%=parameter.description %> 
+    <%} ) %>
     * @param $domain API域名,没有指定则使用构造函数指定的
     */
     <%=method.methodName %> ( parameters : {
@@ -44,9 +46,8 @@ export default class <%=className %> {
         } %>'<%=parameter.camelCaseName %>'  <%=parameter.cardinality %>: <%- paramType  %>,
       <%} ) %>$queryParameters ?: any,
       $domain ?: string
-    }): Promise < AxiosResponse > { 
+    }): Promise <AxiosResponse<<%=method.response%>> > { 
 
-      let body: any
       let config: AxiosRequestConfig = {
         baseURL: parameters.$domain || this.$defaultDomain,
         url: '<%=method.path %>',
@@ -54,12 +55,11 @@ export default class <%=className %> {
       }
     
       config.headers = {}
+      config.params = {}
       <% if ( method.headers ) { %><% method.headers.forEach( header => {%>
       config.headers['<%=header.name%>'] = <%-header.value%>;<% }) %><% } %>
       <% method.parameters.forEach( parameter => { %>
-      <% if (parameter.isHeaderParameter ) { %>config.headers['<%=parameter.camelCaseName%>'] = parameters.<%=parameter.camelCaseName%>;<% } %><% if ( parameter.isPathParameter ) { %>config.url = config.url.replace('{<%=parameter.camelCaseName%>}',parameters.<%=parameter.camelCaseName%>+'');<% } %><% if ( parameter.isBodyParameter ) {%>body = parameters.<%=parameter.camelCaseName %>;
-      config.data = body;<% } %><% } ) %>
-      
+      <% if (parameter.isHeaderParameter ) { %>meter.camelCaseName%>'] = parameters.<%=parameter.camelCaseName%>;<% } %><% if ( parameter.isPathParameter ) { %>config.url = config.url.replace('{<%=parameter.camelCaseName%>}',parameters.<%=parameter.camelCaseName%>+'');<% } %><% if ( parameter.isQueryParameter ) { %>config.params['<%=parameter.camelCaseName%>'] = parameters.<%=parameter.camelCaseName %>;<% } %><% if ( parameter.isBodyParameter ) {%>config.data = parameters.<%=parameter.camelCaseName %>;<% } %><% } ) %>   
       return axios.request( config );
     }
   <%} ) %>

@@ -12,7 +12,10 @@ var _ = require('lodash');
  * @returns a recursive structure representing the type, which can be used as a template model.
  */
 function convertType(swaggerType, swagger) {
-  var typespec = { description: swaggerType.description, isEnum: false };
+  var typespec = {
+    description: swaggerType.description,
+    isEnum: false
+  };
 
   if (swaggerType.hasOwnProperty('schema')) {
     return convertType(swaggerType.schema);
@@ -22,8 +25,8 @@ function convertType(swaggerType, swagger) {
     typespec.target = swaggerType.$ref.substring(swaggerType.$ref.lastIndexOf('/') + 1);
   } else if (swaggerType.hasOwnProperty('enum')) {
     typespec.tsType = swaggerType.enum
-      .map(function(str) {
-        return JSON.stringify(str);
+      .map(function (str) {
+        return "'" + str + "'";
       })
       .join(' | ');
     typespec.isAtomic = true;
@@ -50,11 +53,11 @@ function convertType(swaggerType, swagger) {
       typespec.tsType = 'object';
       typespec.properties = [];
       if (swaggerType.allOf) {
-        _.forEach(swaggerType.allOf, function(ref) {
+        _.forEach(swaggerType.allOf, function (ref) {
           if (ref.$ref) {
             var refSegments = ref.$ref.split('/');
             var name = refSegments[refSegments.length - 1];
-            _.forEach(swagger.definitions, function(definition, definitionName) {
+            _.forEach(swagger.definitions, function (definition, definitionName) {
               if (definitionName === name) {
                 var property = convertType(definition, swagger);
                 Array.prototype.push.apply(typespec.properties, property.properties);
@@ -67,7 +70,7 @@ function convertType(swaggerType, swagger) {
         });
       }
 
-      _.forEach(swaggerType.properties, function(propertyType, propertyName) {
+      _.forEach(swaggerType.properties, function (propertyType, propertyName) {
         var property = convertType(propertyType);
         property.name = propertyName;
 
@@ -79,10 +82,11 @@ function convertType(swaggerType, swagger) {
         typespec.properties.push(property);
       });
     }
-  } /* Else {
-     // type unknown or unsupported... just map to 'any'...
-     typespec.tsType = 'any';
-     } */
+  }
+  /* Else {
+      // type unknown or unsupported... just map to 'any'...
+      typespec.tsType = 'any';
+      } */
 
   // Since Mustache does not provide equality checks, we need to do the case distinction via explicit booleans
   typespec.isRef = typespec.tsType === 'ref';
