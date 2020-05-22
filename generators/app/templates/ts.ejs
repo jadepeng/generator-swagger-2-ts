@@ -1,4 +1,5 @@
 /*jshint -W069 */
+// tslint:disable
 import axios, { AxiosResponse,AxiosRequestConfig } from 'axios'
 // dtos
 
@@ -34,10 +35,8 @@ export class <%=groupName %>API {
     /**
     * <%=method.summary%>
     * @method
-    * @name <%=groupName %>API#<%=method.summary%>
-    <% method.parameters.forEach( parameter => { %>
-    * @param <%=parameter.type %> <%=parameter.camelCaseName %> - <%=parameter.description %> 
-    <%} ) %>
+    * @name <%=groupName %>API#<%=method.summary%><% method.parameters.forEach( parameter => { %>
+    * @param <%=parameter.type %> <%=parameter.camelCaseName %> - <%=parameter.description %> <%} ) %>
     * @param $domain API域名,没有指定则使用构造函数指定的
     */
     <%=method.methodName %> ( parameters : {
@@ -55,10 +54,8 @@ export class <%=groupName %>API {
         url: '<%=method.path %>',
         method: '<%=method.method %>'
       }
-    
       config.headers = {}
-      config.params = {}
-      <% if ( method.headers ) { %><% method.headers.forEach( header => {%>
+      config.params = {}<% if ( method.headers ) { %><% method.headers.forEach( header => {%>
       config.headers['<%=header.name%>'] = <%-header.value%>;<% }) %><% } %>
       <% method.parameters.forEach( parameter => { %>
       <% if (parameter.isHeaderParameter ) { %>meter.camelCaseName%>'] = parameters.<%=parameter.camelCaseName%>;<% } %><% if ( parameter.isPathParameter ) { %>config.url = config.url.replace('{<%=parameter.camelCaseName%>}',parameters.<%=parameter.camelCaseName%>+'');<% } %><% if ( parameter.isQueryParameter ) { %>config.params['<%=parameter.camelCaseName%>'] = parameters.<%=parameter.camelCaseName %>;<% } %><% if ( parameter.isBodyParameter ) {%>config.data = parameters.<%=parameter.camelCaseName %>;<% } %><% } ) %>   
@@ -74,9 +71,6 @@ export class <%=groupName %>API {
 /**
  * <%=description%>
  * @class <%=className%>
- * @param {(string|object)} [domainOrOptions] - The project domain or options object. If object, see the object's optional properties.
- * @param {string} [domainOrOptions.domain] - The project domain
- * @param {object} [domainOrOptions.token] - auth token - object with value property and optional headerOrQueryName and isQuery properties
  */
 export class <%=className %> {
 
