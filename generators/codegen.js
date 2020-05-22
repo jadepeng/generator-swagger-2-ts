@@ -17,6 +17,10 @@ var getClassName = function (name) {
   return className.join('');
 }
 
+var normalizeTypeName = function (id) {
+  return id.replace(/«|»/g,"");
+};
+
 var normalizeName = function (id) {
   return id.replace(/\.|\-|\{|\}|\s/g, '_');
 };
@@ -219,7 +223,7 @@ var getViewForSwagger2 = function (opts, type) {
         var responseSchema = response['200'].schema;
         if (responseSchema && _.isString(responseSchema.$ref)) {
           var segments = responseSchema.$ref.split('/');
-          method.response = segments.length === 1 ? segments[0] : segments[2];
+          method.response = normalizeTypeName(segments.length === 1 ? segments[0] : segments[2]);
         }
       }
 
@@ -295,7 +299,7 @@ var getViewForSwagger2 = function (opts, type) {
 
   _.forEach(swagger.definitions, function (definition, name) {
     data.definitions.push({
-      name: name,
+      name: normalizeTypeName(name),
       description: definition.description,
       tsType: ts.convertType(definition, swagger)
     });
