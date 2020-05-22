@@ -23,7 +23,20 @@ yo swagger-2-ts
 - 输入swagger-ui 地址，例如http://192.168.86.8:8051/swagger-ui.html，程序包会自动将这个url地址replace('swagger-ui.html', 'v2/api-docs')得到swagger-api-docs，然后下载后解析，生成api class
 - 可选生成js 或者 typescript
 - 可以自定义生成的api class名称、api文件名
-- API 返回泛型
+- API 支持泛型
+
+
+可以通过命令行直接传递参数
+
+```bash
+ yo swagger-2-ts --swaggerUrl=http://localhost:8080/swagger-ui.html --className=API --type=typescript --outputFile=api.ts
+```
+
+- swaggerUrl: swagger ui url swaggerui地址
+- className： API class name 类名
+- type： typescript or javascipt 
+- outputFile: api 文件保存路径
+
 
 
 ## 生成代码demo：

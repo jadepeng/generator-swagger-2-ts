@@ -28,6 +28,17 @@ According to the prompt:
 - choose generate js or typescript
 - you can customize the generated API class name, API file name
 
+or you can pass arguments by command:
+
+```bash
+ yo swagger-2-ts --swaggerUrl=http://localhost:8080/swagger-ui.html --className=API --type=typescript --outputFile=api.ts
+```
+
+- swaggerUrl: swagger ui url
+- className： API class name
+- type： typescript or javascipt
+- outputFile: api file save to
+
 ## generated CODE：
 
 ```javascript
