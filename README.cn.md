@@ -23,44 +23,109 @@ yo swagger-2-ts
 - 输入swagger-ui 地址，例如http://192.168.86.8:8051/swagger-ui.html，程序包会自动将这个url地址replace('swagger-ui.html', 'v2/api-docs')得到swagger-api-docs，然后下载后解析，生成api class
 - 可选生成js 或者 typescript
 - 可以自定义生成的api class名称、api文件名
+- API 返回泛型
 
 
 ## 生成代码demo：
 
 ```javascript
-export default class API {
-    $defaultDomain = 'http://localhost:8051'
-    /**
-    * @method
-    * @name API#getSkillsUsingGET
-    * @param string authorization  
-    * @param $domain 
-    */
-    getSkillsUsingGET (parameters){ 
-      let body = null;
-      let config = {
-        baseURL: parameters.$domain || this.$defaultDomain,
-        url: '/api/skill',
-        method: 'GET'
-      };
-      config.headers = {}
-      config.headers['Accept'] = '*/*';
-      config.headers['authorization'] = parameters.authorization;
-      config.data = body
-      return axios.request( config );
-    }
+
+
+export type AccountUserInfo = {
+  disableTime?: string
+  isDisable?: number
+  lastLoginIp?: string
+  lastLoginPlace?: string
+  lastLoginTime?: string
+  openId?: string
 }
+
+
+export type BasePayloadResponse = {
+  data?: object
+  desc?: string
+  retcode?: string
+
+}
+
+/**
+ * User Account Controller
+ * @class UserAccountAPI
+ */
+export class UserAccountAPI {
+/**
+  * changeUserState
+  * @method
+  * @name UserAccountAPI#changeUserState
+  
+  * @param  accountUserInfo - accountUserInfo 
+  
+  * @param $domain API域名,没有指定则使用构造函数指定的
+  */
+  changeUserState(parameters: {
+    'accountUserInfo': AccountUserInfo,
+    $queryParameters?: any,
+    $domain?: string
+  }): Promise<AxiosResponse<BasePayloadResponse>> {
+
+    let config: AxiosRequestConfig = {
+      baseURL: parameters.$domain || this.$defaultDomain,
+      url: '/userAccount/changeUserState',
+      method: 'PUT'
+    }
+
+    config.headers = {}
+    config.params = {}
+
+    config.headers[ 'Accept' ] = '*/*'
+    config.headers[ 'Content-Type' ] = 'application/json'
+
+    config.data = parameters.accountUserInfo
+    return axios.request(config)
+  }
+
+  _UserAccountAPI: UserAccountAPI = null;
+
+  /**
+  * 获取 User Account Controller API
+  * return @class UserAccountAPI
+  */
+  getUserAccountAPI(): UserAccountAPI {
+    if (!this._UserAccountAPI) {
+      this._UserAccountAPI = new UserAccountAPI(this.$defaultDomain)
+    }
+    return this._UserAccountAPI
+  }
+}
+
+
+/**
+ * 管理系统接口描述
+ * @class API
+ */
+export class API {
+  /**
+   *  API构造函数
+   * @param domain API域名
+   */
+  constructor(domain?: string) {
+    this.$defaultDomain = domain || 'http://localhost:8080'
+  }
+}
+
 
 ```
 
 ## 使用
 
 ```javascript
-var API = require("./api");
-var api = new API("http://192.168.86.8:8051");
-api.getSkillsUsingGET({}).then(function (response) {
-    console.log(response.data);
-});
+import { API } from './http/api/manageApi'
+// in main.ts
+let api = new API("/api/")
+api.getUserAccountAPI().changeUserState({
+  isDisable: 1
+  openId: 'open id'
+})
 ```
 
 ## Getting To Know Yeoman
