@@ -9,14 +9,14 @@ type <%= element.name.replace("«","").replace("»","") %> = {
 }
 <%} ) %>
 
-/**
- * <%=description%>
- * @class <%=className%>
- * @param {(string|object)} [domainOrOptions] - The project domain or options object. If object, see the object's optional properties.
- * @param {string} [domainOrOptions.domain] - The project domain
- * @param {object} [domainOrOptions.token] - auth token - object with value property and optional headerOrQueryName and isQuery properties
- */
-export default class <%=className %> {
+
+<% for(var groupName in apiGroups) { 
+    var groupMethods = apiGroups[groupName];
+  %>  
+
+// start <%=groupName %>API
+
+class <%=groupName %>API {
 
   $defaultDomain:string
 
@@ -27,8 +27,8 @@ export default class <%=className %> {
   constructor( domain?: string ){
     this.$defaultDomain = domain || '<%=defaultDomain%>';
   }
-
-  <% methods.forEach( method => {%>  
+  
+  <% groupMethods.forEach( method => {%>  
     /**
     * <%=method.summary%>
     * @method
@@ -63,5 +63,40 @@ export default class <%=className %> {
       return axios.request( config );
     }
   <%} ) %>
-    
+
+}
+
+<%} %>
+
+
+/**
+ * <%=description%>
+ * @class <%=className%>
+ * @param {(string|object)} [domainOrOptions] - The project domain or options object. If object, see the object's optional properties.
+ * @param {string} [domainOrOptions.domain] - The project domain
+ * @param {object} [domainOrOptions.token] - auth token - object with value property and optional headerOrQueryName and isQuery properties
+ */
+export class <%=className %> {
+
+  $defaultDomain:string
+
+  /**
+   *  <%=className%>构造函数
+   * @param domain API域名
+   */
+  constructor( domain?: string ){
+    this.$defaultDomain = domain || '<%=defaultDomain%>';
+  }
+  
+  <% for(var groupName in apiGroups) { 
+  %>
+    _<%=groupName %>API: <%=groupName %>API = null;
+    get<%=groupName %>API(): <%=groupName %>API{
+      if(!this._<%=groupName %>API){
+        this._<%=groupName %>API = new <%=groupName %>API(this.$defaultDomain)
+      }
+      return this._<%=groupName %>API;
+    }
+  
+  <%} %>
 }

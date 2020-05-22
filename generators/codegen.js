@@ -4,6 +4,19 @@ var beautify = require('js-beautify').js_beautify;
 var _ = require('lodash');
 var ts = require('./util');
 
+var getClassName = function (name) {
+  name = name.replace(/-Api|-controller|\./gi, "");
+  var parts = name.split('-');
+  var className = [];
+  _.each(parts, function (part) {
+    var words = part.toLowerCase().split('');
+    for (var i = 0; i < words.length; i++) {
+      className.push(i == 0 ? words[i].toUpperCase() : words[i]);
+    }
+  });
+  return className.join('');
+}
+
 var normalizeName = function (id) {
   return id.replace(/\.|\-|\{|\}|\s/g, '_');
 };
@@ -47,6 +60,7 @@ var getViewForSwagger2 = function (opts, type) {
     'UNLOCK',
     'PROPFIND'
   ];
+
   var data = {
     isNode: type === 'node' || type === 'react',
     isES6: opts.isES6 || type === 'react',
@@ -59,11 +73,17 @@ var getViewForSwagger2 = function (opts, type) {
       swagger.schemes[0] +
       '://' +
       swagger.host +
-      swagger.basePath.replace(/\/+$/g, '') :
-      '',
+      swagger.basePath.replace(/\/+$/g, '') : '',
     methods: [],
     definitions: []
   };
+
+  var tags = {};
+
+  _.each(swagger.tags, function (tag) {
+    var name = getClassName(tag.name);
+    tags[name] = tag.description;
+  });
 
   _.forEach(swagger.paths, function (api, path) {
     var globalParams = [];
@@ -129,8 +149,19 @@ var getViewForSwagger2 = function (opts, type) {
         isSecureBasic: secureTypes.indexOf('basic') !== -1,
         parameters: [],
         headers: [],
-        response: "object"
+        response: "object",
+        group: null,
       };
+
+      if (op.tags) {
+        _.each(op.tags, function (tag) {
+          var name = getClassName(tag);
+          if (tags[name]) {
+            method.group = name;
+          }
+        });
+      }
+
       if (method.isSecure && method.isSecureToken) {
         data.isSecureToken = method.isSecureToken;
       }
@@ -216,6 +247,15 @@ var getViewForSwagger2 = function (opts, type) {
         method.parameters.push(parameter);
       });
       data.methods.push(method);
+      if (method.group) {
+        if (!data.apiGroups) {
+          data.apiGroups = {};
+        }
+        if (!data.apiGroups[method.group]) {
+          data.apiGroups[method.group] = [];
+        }
+        data.apiGroups[method.group].push(method);
+      }
     });
   });
 
