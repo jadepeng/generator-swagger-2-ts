@@ -3,7 +3,7 @@ import axios, { AxiosResponse,AxiosRequestConfig } from 'axios'
 // dtos
 
 <% definitions.forEach( element => {%>
-type <%= element.name.replace("«","").replace("»","") %> = {
+export type <%= element.name.replace("«","").replace("»","") %> = {
   <% element.tsType.properties.forEach( propertity => { %><%= propertity.name %> <% if ( propertity.optional ) { %>? <% } %>: <% if ( propertity.isRef ) { %> <%= propertity.target %> <% } %><% if ( propertity.isAtomic ) { %> <%- propertity.tsType %> <% } %> <% if ( propertity.isObject ) { %> object <% } %><% if ( propertity.isArray ) { %> Array <<%-propertity.elementType.target?propertity.elementType.target:propertity.elementType.tsType %>><% } %>
   <% } ) %>  
 }
@@ -11,12 +11,14 @@ type <%= element.name.replace("«","").replace("»","") %> = {
 
 
 <% for(var groupName in apiGroups) { 
-    var groupMethods = apiGroups[groupName];
+    var groupDetail = apiGroups[groupName];
   %>  
 
-// start <%=groupName %>API
-
-class <%=groupName %>API {
+/**
+ * <%=groupDetail.desc%>
+ * @class <%=groupName %>API
+ */
+export class <%=groupName %>API {
 
   $defaultDomain:string
 
@@ -28,11 +30,11 @@ class <%=groupName %>API {
     this.$defaultDomain = domain || '<%=defaultDomain%>';
   }
   
-  <% groupMethods.forEach( method => {%>  
+  <% groupDetail.items.forEach( method => {%>  
     /**
     * <%=method.summary%>
     * @method
-    * @name <%=className %>#<%=method.summary%>
+    * @name <%=groupName %>API#<%=method.summary%>
     <% method.parameters.forEach( parameter => { %>
     * @param <%=parameter.type %> <%=parameter.camelCaseName %> - <%=parameter.description %> 
     <%} ) %>
@@ -89,8 +91,14 @@ export class <%=className %> {
   }
   
   <% for(var groupName in apiGroups) { 
+    var groupDetail = apiGroups[groupName];
   %>
     _<%=groupName %>API: <%=groupName %>API = null;
+
+    /**
+    * 获取 <%=groupDetail.desc%> API
+    * return @class <%=groupName %>API
+    */
     get<%=groupName %>API(): <%=groupName %>API{
       if(!this._<%=groupName %>API){
         this._<%=groupName %>API = new <%=groupName %>API(this.$defaultDomain)

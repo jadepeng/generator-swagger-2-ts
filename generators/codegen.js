@@ -85,6 +85,8 @@ var getViewForSwagger2 = function (opts, type) {
     tags[name] = tag.description;
   });
 
+  var methodNameDict = {}
+
   _.forEach(swagger.paths, function (api, path) {
     var globalParams = [];
     /**
@@ -99,7 +101,7 @@ var getViewForSwagger2 = function (opts, type) {
 
     _.forEach(api, function (op, m) {
       var M = m.toUpperCase();
-      if (M === '' || authorizedMethods.indexOf(M) === -1) {
+      if (M === '' || M === 'HEAD' || M === 'OPTIONS' || M === 'PATCH' || authorizedMethods.indexOf(M) === -1) {
         return;
       }
       var secureTypes = [];
@@ -120,19 +122,21 @@ var getViewForSwagger2 = function (opts, type) {
       var methodName = op.operationId ?
         normalizeName(op.operationId) :
         getPathToMethodName(opts, m, path);
-      // Make sure the method name is unique
-      if (methods.indexOf(methodName) !== -1) {
-        var i = 1;
-        while (true) {
-          if (methods.indexOf(methodName + '_' + i) !== -1) {
-            i++;
-          } else {
-            methodName = methodName + '_' + i;
-            break;
-          }
-        }
-      }
-      methods.push(methodName);
+
+      // methodName = methodName.replace(/Using.+$/, "");
+      // // Make sure the method name is unique
+      // if (methods.indexOf(methodName) !== -1) {
+      //   var i = 1;
+      //   while (true) {
+      //     if (methods.indexOf(methodName + '_' + i) !== -1) {
+      //       i++;
+      //     } else {
+      //       methodName = methodName + '_' + i;
+      //       break;
+      //     }
+      //   }
+      // }
+      // methods.push(methodName);
 
       var method = {
         path: path,
@@ -161,6 +165,32 @@ var getViewForSwagger2 = function (opts, type) {
           }
         });
       }
+
+      // fix method name
+      if (method.group) {
+        // remove Using
+        var newMethodName = methodName.replace(/Using.+$/, "");
+        if (!methodNameDict[method.group]) {
+          methodNameDict[method.group] = [];
+        }
+        // Make sure the method name is unique
+        if (methodNameDict[method.group].indexOf(newMethodName) == -1) {
+          methodName = newMethodName;
+        } else if (methodNameDict[method.group].indexOf(methodName) !== -1) {
+          var i = 1;
+          while (true) {
+            if (methods.indexOf(methodName + '_' + i) !== -1) {
+              i++;
+            } else {
+              methodName = methodName + '_' + i;
+              break;
+            }
+          }
+        }
+        method.methodName = methodName;
+        methodNameDict[method.group].push(method.methodName);
+      }
+
 
       if (method.isSecure && method.isSecureToken) {
         data.isSecureToken = method.isSecureToken;
@@ -252,9 +282,13 @@ var getViewForSwagger2 = function (opts, type) {
           data.apiGroups = {};
         }
         if (!data.apiGroups[method.group]) {
-          data.apiGroups[method.group] = [];
+          data.apiGroups[method.group] = {
+            desc: tags[method.group],
+            items: []
+          };
         }
-        data.apiGroups[method.group].push(method);
+        // api分组
+        data.apiGroups[method.group].items.push(method);
       }
     });
   });

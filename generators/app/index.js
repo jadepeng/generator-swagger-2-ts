@@ -59,13 +59,13 @@ module.exports = class extends Generator {
   }
 
   writing() {
-    let swaggerUrl = this.props.swaggerUrl.replace('swagger-ui.html', 'v2/api-docs');
-    let clsName = this.props.className;
-    let outPutFile = this.props.outPutFile;
-    let isTypescript = this.props.type === "typescript";
+    var swaggerUrl = this.props.swaggerUrl.replace('swagger-ui.html', 'v2/api-docs');
+    var clsName = this.props.className;
+    var outPutFile = this.props.outPutFile;
+    var isTypescript = this.props.type === "typescript";
     axios.get(swaggerUrl).then(response => {
       if (response.status == 200) {
-        let swagger = response.data;
+        var swagger = response.data;
         var swaggerData = codegen.getViewForSwagger(
           { swagger: swagger, className: clsName },
           'typescript'
