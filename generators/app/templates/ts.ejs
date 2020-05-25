@@ -5,7 +5,8 @@ import axios, { AxiosResponse,AxiosRequestConfig } from 'axios'
 
 <% definitions.forEach( element => {%>
 export type <%= element.name.replace("«","").replace("»","") %> = {
-  <% element.tsType.properties.forEach( propertity => { %><%= propertity.name %><% if ( propertity.optional ) { %>?<% } %>:<% if ( propertity.isRef ) { %> <%= propertity.target %> <% } %><% if ( propertity.isAtomic ) { %> <%- propertity.tsType %> <% } %> <% if ( propertity.isObject ) { %> object <% } %><% if ( propertity.isArray ) { %> Array <<%-propertity.elementType.target?propertity.elementType.target:propertity.elementType.tsType %>><% } %><% } ) %>  
+  <% element.tsType.properties.forEach( propertity => { %><%= propertity.name %><% if ( propertity.optional ) { %>?<% } %>:<% if ( propertity.isRef ) { %> <%= propertity.target %> <% } %><% if ( propertity.isAtomic ) { %> <%- propertity.tsType %> <% } %> <% if ( propertity.isObject ) { %> object <% } %><% if ( propertity.isArray ) { %> Array <<%-propertity.elementType.target?propertity.elementType.target:propertity.elementType.tsType %>><% } %>
+  <% } ) %>  
 }
 <%} ) %>
 
