@@ -34,6 +34,6 @@ api.withInterceptors(
         }
     })
 
-api.get数据集API().getAllDataSetsAsync({ name: "" }).then(resp => {
+api.get数据集API().getAllDataSetsAsync({ name: "", $queryParameters: { "test": 1 } }).then(resp => {
     console.log(resp)
 })

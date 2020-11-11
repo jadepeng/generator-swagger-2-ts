@@ -48,7 +48,7 @@ export class <%=groupName %>API {
         if(paramType === "array"){
           paramType = "Array<"+parameter.tsType.elementType.target+">"
         } %>'<%=parameter.camelCaseName %>'  <%=parameter.cardinality %>: <%- paramType  %>,
-      <%} ) %>$queryParameters ?: any,
+      <%} ) %>$queryParameters ?: object,
       $domain ?: string
     }): Promise <AxiosResponse<<%=method.response%>> > { 
 
@@ -58,7 +58,7 @@ export class <%=groupName %>API {
         method: '<%=method.method %>'
       }
       config.headers = {}
-      config.params = {}<% if ( method.headers ) { %><% method.headers.forEach( header => {%>
+      config.params = parameters.$queryParameters || {} <% if ( method.headers ) { %><% method.headers.forEach( header => {%>
       config.headers['<%=header.name%>'] = <%-header.value%>;<% }) %><% } %>
       <% method.parameters.forEach( parameter => { %>
       <% if (parameter.isHeaderParameter ) { %>meter.camelCaseName%>'] = parameters.<%=parameter.camelCaseName%>;<% } %><% if ( parameter.isPathParameter ) { %>config.url = config.url.replace('{<%=parameter.camelCaseName%>}',parameters.<%=parameter.camelCaseName%>+'');<% } %><% if ( parameter.isQueryParameter ) { %>config.params['<%=parameter.camelCaseName%>'] = parameters.<%=parameter.camelCaseName %>;<% } %><% if ( parameter.isBodyParameter ) {%>config.data = parameters.<%=parameter.camelCaseName %>;<% } %><% } ) %>   
@@ -78,7 +78,7 @@ export class <%=groupName %>API {
         if(paramType === "array"){
           paramType = "Array<"+parameter.tsType.elementType.target+">"
         } %>'<%=parameter.camelCaseName %>'  <%=parameter.cardinality %>: <%- paramType  %>,
-      <%} ) %>$queryParameters ?: any,
+      <%} ) %>$queryParameters ?: object,
       $domain ?: string
     }): Promise <<%=method.response%>> { 
       let resp = await this.<%=method.methodName %>(parameters)
