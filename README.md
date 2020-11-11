@@ -96,18 +96,25 @@ export class UserAccountAPI {
     return axios.request(config)
   }
 
-  _UserAccountAPI: UserAccountAPI = null;
-
-  /**
-  * 获取 User Account Controller API
-  * return @class UserAccountAPI
+/**
+  * changeUserState
+  * @method
+  * @name UserAccountAPI#changeUserState
+  
+  * @param  accountUserInfo - accountUserInfo 
+  
+  * @param $domain API域名,没有指定则使用构造函数指定的
   */
-  getUserAccountAPI(): UserAccountAPI {
-    if (!this._UserAccountAPI) {
-      this._UserAccountAPI = new UserAccountAPI(this.$defaultDomain)
-    }
-    return this._UserAccountAPI
+  async changeUserStateAsync(parameters: {
+    'accountUserInfo': AccountUserInfo,
+    $queryParameters?: any,
+    $domain?: string
+  }): Promise<BasePayloadResponse> {
+
+    let resp = await this.changeUserStateAsync(parameters);
+    return Promise.resolve(resp.data);
   }
+
 }
 
 
@@ -123,6 +130,19 @@ export class API {
   constructor(domain?: string) {
     this.$defaultDomain = domain || 'http://localhost:8080'
   }
+
+  _UserAccountAPI: UserAccountAPI = null;
+
+  /**
+  * 获取 User Account Controller API
+  * return @class UserAccountAPI
+  */
+  getUserAccountAPI(): UserAccountAPI {
+    if (!this._UserAccountAPI) {
+      this._UserAccountAPI = new UserAccountAPI(this.$defaultDomain)
+    }
+    return this._UserAccountAPI
+  }
 }
 
 ```
@@ -130,12 +150,43 @@ export class API {
 ## Use the API Class
 
 ```javascript
-import { API } from './http/api/manageApi'
+import { API } from './api'
 // in main.ts
-let api = new API("/api/")
+let api = new API('YOUR_API_HOST')
+api.withAuthorization("YOUR_TOKEN")
+// add Interceptors
+api.withInterceptors(
+    response => {
+        if (response.status === 200) {
+            return Promise.resolve(response)
+        } else {
+            return Promise.reject(response)
+        }
+    },
+    error => {
+        if (error.response.status) {
+            switch (error.response.status) {
+                case 401:
+                    console.error("401 Unauthorized")
+                    break
+                case 403:
+                    console.error("403 Forbidden")
+                    break
+                case 404:
+                    console.error("404 Not Found")
+                    break
+                default:
+                    console.error(error.response.data.message)
+            }
+            return Promise.reject(error.response)
+        }
+    })
+
 api.getUserAccountAPI().changeUserState({
   isDisable: 1
   openId: 'open id'
+}).then(resp=>{
+  console.log(resp)
 })
 
 

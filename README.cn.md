@@ -43,7 +43,6 @@ yo swagger-2-ts
 
 ```javascript
 
-
 export type AccountUserInfo = {
   disableTime?: string
   isDisable?: number
@@ -77,7 +76,7 @@ export class UserAccountAPI {
   */
   changeUserState(parameters: {
     'accountUserInfo': AccountUserInfo,
-    $queryParameters?: any,
+    $queryParameters?: object,
     $domain?: string
   }): Promise<AxiosResponse<BasePayloadResponse>> {
 
@@ -97,18 +96,25 @@ export class UserAccountAPI {
     return axios.request(config)
   }
 
-  _UserAccountAPI: UserAccountAPI = null;
-
-  /**
-  * 获取 User Account Controller API
-  * return @class UserAccountAPI
+/**
+  * changeUserState
+  * @method
+  * @name UserAccountAPI#changeUserState
+  
+  * @param  accountUserInfo - accountUserInfo 
+  
+  * @param $domain API域名,没有指定则使用构造函数指定的
   */
-  getUserAccountAPI(): UserAccountAPI {
-    if (!this._UserAccountAPI) {
-      this._UserAccountAPI = new UserAccountAPI(this.$defaultDomain)
-    }
-    return this._UserAccountAPI
+  async changeUserStateAsync(parameters: {
+    'accountUserInfo': AccountUserInfo,
+    $queryParameters?: object,
+    $domain?: string
+  }): Promise<BasePayloadResponse> {
+
+    let resp = await this.changeUserStateAsync(parameters);
+    return Promise.resolve(resp.data);
   }
+
 }
 
 
@@ -124,20 +130,71 @@ export class API {
   constructor(domain?: string) {
     this.$defaultDomain = domain || 'http://localhost:8080'
   }
-}
 
+  _UserAccountAPI: UserAccountAPI = null;
+
+  /**
+  * 获取 User Account Controller API
+  * return @class UserAccountAPI
+  */
+  getUserAccountAPI(): UserAccountAPI {
+    if (!this._UserAccountAPI) {
+      this._UserAccountAPI = new UserAccountAPI(this.$defaultDomain)
+    }
+    return this._UserAccountAPI
+  }
+}
 
 ```
 
 ## 使用
 
 ```javascript
-import { API } from './http/api/manageApi'
+
+import { API } from './api'
+
+let api = new API('YOUR_API_HOST')
+// add Header Authorization
+api.withAuthorization("YOUR_TOKEN")
+// add Interceptors
+api.withInterceptors(
+    response => {
+        if (response.status === 200) {
+            return Promise.resolve(response)
+        } else {
+            return Promise.reject(response)
+        }
+    },
+    error => {
+        if (error.response.status) {
+            switch (error.response.status) {
+                // 401: 未登录
+                case 401:
+                    console.error("身份验证失败，请关闭重新进入。")
+                    break
+                // 403 token过期
+                case 403:
+                    console.error("登录过期，请关闭重新进入。")
+                    break
+                // 404请求不存在
+                case 404:
+                    console.error("您访问的网页不存在。")
+                    break
+                // 其他错误，直接抛出错误提示
+                default:
+                    console.error(error.response.data.message)
+            }
+            return Promise.reject(error.response)
+        }
+    })
+
+
 // in main.ts
-let api = new API("/api/")
 api.getUserAccountAPI().changeUserState({
   isDisable: 1
   openId: 'open id'
+}).then(resp=>{
+  console.log(resp)
 })
 ```
 
