@@ -1,6 +1,6 @@
 {
   "name": "generator-swagger-2-ts",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "swagger to typescript/javascript api class use axios",
   "homepage": "https://github.com/jadepeng/generator-swagger-2-ts",
   "author": {
@@ -27,7 +27,7 @@
     "jest": "^22.0.6",
     "js-beautify": "^1.7.5",
     "lint-staged": "^6.1.1",
-    "lodash": "^4.17.5",
+    "lodash": "^4.17.19",
     "nsp": "^2.8.0",
     "prettier": "^1.11.1",
     "yeoman-assert": "^3.1.0",
@@ -44,9 +44,7 @@
   "jest": {
     "testEnvironment": "node"
   },
-  "scripts": {
-
-  },
+  "scripts": {},
   "eslintConfig": {
     "extends": [
       "xo",

@@ -1,11 +1,14 @@
 /*jshint -W069 */
 // tslint:disable
 import axios, { AxiosResponse,AxiosRequestConfig } from 'axios'
+
+const axiosInstance = axios.create({});
+
 // dtos
 
 <% definitions.forEach( element => {%>
 export type <%= element.name.replace("«","").replace("»","") %> = {
-  <% element.tsType.properties.forEach( propertity => { %><%= propertity.name %><% if ( propertity.optional ) { %>?<% } %>:<% if ( propertity.isRef ) { %> <%= propertity.target %> <% } %><% if ( propertity.isAtomic ) { %> <%- propertity.tsType %> <% } %> <% if ( propertity.isObject ) { %> object <% } %><% if ( propertity.isArray ) { %> Array <<%-propertity.elementType.target?propertity.elementType.target:propertity.elementType.tsType %>><% } %>
+  <% element.tsType.properties.forEach( propertity => { %><%= propertity.name %><% if ( propertity.optional ) { %>?<% } %>:<% if ( propertity.isRef ) { %> <%= propertity.target %> <% } %><% if ( propertity.isAtomic ) { %> <%- propertity.tsType %> <% } %> <% if ( propertity.isObject ) { %> object <% } %><% if ( propertity.isArray ) { %> Array <<%-propertity.elementType.target?propertity.elementType.target.replace("«","").replace("»",""):propertity.elementType.tsType %>><% } %>
   <% } ) %>  
 }
 <%} ) %>
@@ -59,7 +62,27 @@ export class <%=groupName %>API {
       config.headers['<%=header.name%>'] = <%-header.value%>;<% }) %><% } %>
       <% method.parameters.forEach( parameter => { %>
       <% if (parameter.isHeaderParameter ) { %>meter.camelCaseName%>'] = parameters.<%=parameter.camelCaseName%>;<% } %><% if ( parameter.isPathParameter ) { %>config.url = config.url.replace('{<%=parameter.camelCaseName%>}',parameters.<%=parameter.camelCaseName%>+'');<% } %><% if ( parameter.isQueryParameter ) { %>config.params['<%=parameter.camelCaseName%>'] = parameters.<%=parameter.camelCaseName %>;<% } %><% if ( parameter.isBodyParameter ) {%>config.data = parameters.<%=parameter.camelCaseName %>;<% } %><% } ) %>   
-      return axios.request( config );
+      return axiosInstance.request( config );
+    }
+
+    /**
+    * <%=method.summary%>
+    * @method
+    * @name <%=groupName %>API#<%=method.summary%><% method.parameters.forEach( parameter => { %>
+    * @param <%=parameter.type %> <%=parameter.camelCaseName %> - <%=parameter.description %> <%} ) %>
+    * @param $domain API域名,没有指定则使用构造函数指定的
+    */
+    async <%=method.methodName %>Async ( parameters : {
+      <% method.parameters.forEach( parameter => {
+        let  paramType = parameter.tsType.target || parameter.tsType.tsType;
+        if(paramType === "array"){
+          paramType = "Array<"+parameter.tsType.elementType.target+">"
+        } %>'<%=parameter.camelCaseName %>'  <%=parameter.cardinality %>: <%- paramType  %>,
+      <%} ) %>$queryParameters ?: any,
+      $domain ?: string
+    }): Promise <<%=method.response%>> { 
+      let resp = await this.<%=method.methodName %>(parameters)
+      return Promise.resolve(resp.data);
     }
   <%} ) %>
 
@@ -82,6 +105,16 @@ export class <%=className %> {
    */
   constructor( domain?: string ){
     this.$defaultDomain = domain || '<%=defaultDomain%>';
+  }
+
+  withAuthorization(authorization: string = ''){
+    if (authorization) {
+      axiosInstance.defaults.headers.common['Authorization'] = authorization
+    }
+  }
+
+  withInterceptors(onFulfilled?: (value:AxiosResponse<any>) => any | Promise<any>, onRejected?: (error: any) => any){
+    axios.interceptors.response.use(onFulfilled,onRejected)
   }
   
   <% for(var groupName in apiGroups) { 

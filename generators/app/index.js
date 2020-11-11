@@ -66,7 +66,7 @@ module.exports = class extends Generator {
     } else {
       prompts.push({
         type: 'input',
-        name: 'outPutFile',
+        name: 'outputFile',
         message: 'Please enter the API file name',
         default: 'api.ts'
       });
@@ -85,7 +85,7 @@ module.exports = class extends Generator {
     console.log(this.props);
     var swaggerUrl = this.props.swaggerUrl.replace('swagger-ui.html', 'v2/api-docs');
     var clsName = this.props.className;
-    var outPutFile = this.props['outputFile'];
+    var outputFile = this.props['outputFile'];
     var isTypescript = this.props.type === "typescript";
     axios.get(swaggerUrl).then(response => {
       if (response.status == 200) {
@@ -99,7 +99,7 @@ module.exports = class extends Generator {
         swaggerData.defaultDomain = this.props.swaggerUrl.replace('/swagger-ui.html', '');
         this.fs.copyTpl(
           this.templatePath(isTypescript ? 'ts.ejs' : 'js.ejs'),
-          this.destinationPath(outPutFile),
+          this.destinationPath(outputFile),
           swaggerData
         );
       } else {
